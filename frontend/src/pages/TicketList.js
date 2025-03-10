@@ -54,29 +54,9 @@ const TicketList = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Tickets</h1>
-        {/* Comentário dentro da tag JSX */}
-        <Link 
-          to="/create-ticket" 
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center"
-        >
-          <Plus size={18} className="mr-2" />
-          Novo Ticket
-        </Link>
-      </div>
-
-      <div className="mb-6 flex items-center">
-        <Filter size={20} className="mr-2 text-gray-600 dark:text-gray-400" />
-        <select 
-          className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-700 dark:text-white"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        >
-          <option value="all">Todos os Tickets</option>
-          <option value="open">Tickets Abertos</option>
-          <option value="closed">Tickets Fechados</option>
-        </select>
-      </div>
-
+        {/* Comentário aqui dentro de chaves */}
+        Seu conteúdo aqui
+    </div>
       {loading ? (
         <div className="text-center py-10">
           <p className="text-gray-600 dark:text-gray-400">Carregando tickets...</p>

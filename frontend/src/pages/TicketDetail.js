@@ -20,7 +20,7 @@ const TicketDetail = () => {
     const [newComment, setNewComment] = useState('');
     const [comments, setComments] = useState([]);
     // Remove or comment out this line if it exists
-    // const [user, setUser] = useState(null);
+    const [user, setUser] = useState(null); // substituir ticketUser por user
     
     // Remover a variável não utilizada 'ticketUser'
 
@@ -98,11 +98,8 @@ const TicketDetail = () => {
         if (!newComment.trim()) return;
 
         try {
-            const response = await ticketService.addComment(id, { text: newComment });
-            // Limpar o campo de comentário
+            await ticketService.addComment(id, { text: newComment });
             setNewComment('');
-            
-            // Buscar os dados atualizados do ticket, incluindo todos os comentários
             fetchTicketDetails();
         } catch (err) {
             console.error('Erro completo:', err);
@@ -414,3 +411,6 @@ const TicketDetail = () => {
 }
 
 export default TicketDetail;
+
+// Remove this duplicate function that was outside the component
+// const handleSubmit = async (e) => { ... };
