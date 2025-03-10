@@ -22,7 +22,7 @@ const TicketDetail = () => {
     // Remove or comment out this line if it exists
     // const [user, setUser] = useState(null);
     
-    const [ticketUser, setTicketUser] = useState(null); // Renomeie para ticketUser se precisar manter
+    // Remover a variável não utilizada 'ticketUser'
 
     // Estilos comuns para reutilização
     const styles = {
@@ -80,8 +80,6 @@ const TicketDetail = () => {
             
             // Obter informações do usuário atual
             const userData = authService.getCurrentUser();
-            // Replace setUser with setTicketUser since that's what you've defined
-            setTicketUser(userData);
         } catch (err) {
             console.error('Error in fetchTicketDetails:', err);
             setError('Erro ao carregar detalhes do ticket: ' + (err.message || 'Erro desconhecido'));
