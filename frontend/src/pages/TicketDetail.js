@@ -10,20 +10,16 @@ import { useAuth } from '../contexts/AuthContext';
 const TicketDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    // Add this line to get the user from auth context
     const { user } = useAuth();
-    const { theme } = useTheme(); // Adicione esta linha para obter o tema atual
+    const { theme } = useTheme();
     
     const [ticket, setTicket] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [newComment, setNewComment] = useState('');
     const [comments, setComments] = useState([]);
-    // Remove or comment out this line if it exists
-    const [user, setUser] = useState(null); // substituir ticketUser por user
+    // Removida a linha duplicada do user state
     
-    // Remover a variável não utilizada 'ticketUser'
-
     // Estilos comuns para reutilização
     const styles = {
         button: {
