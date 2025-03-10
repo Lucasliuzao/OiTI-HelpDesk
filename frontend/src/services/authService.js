@@ -1,11 +1,9 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api';
+import api from './api';
 
 const authService = {
     login: async (credentials) => {
         try {
-            const response = await axios.post(`${API_URL}/auth/login`, credentials);
+            const response = await api.post('/auth/login', credentials);
             
             // Armazenar o usuário com o token no localStorage
             if (response.data && response.data.token) {
@@ -31,7 +29,7 @@ const authService = {
 
     recuperarSenha: async (email) => {
         try {
-            const response = await axios.post(`${API_URL}/auth/recuperar-senha`, { email });
+            const response = await api.post('/auth/recuperar-senha', { email });
             return response;
         } catch (error) {
             if (error.response) {
@@ -43,7 +41,7 @@ const authService = {
 
     redefinirSenha: async (token, newPassword) => {
         try {
-            const response = await axios.post(`${API_URL}/auth/redefinir-senha`, { 
+            const response = await api.post('/auth/redefinir-senha', { 
                 token, 
                 newPassword 
             });
@@ -58,7 +56,7 @@ const authService = {
     
     registro: async (userData) => {
         try {
-            const response = await axios.post(`${API_URL}/auth/registro`, {
+            const response = await api.post('/auth/registro', {
                 nome: userData.nome,
                 email: userData.email,
                 password: userData.password
@@ -70,7 +68,7 @@ const authService = {
             }
             throw new Error('Erro de conexão ao servidor');
         }
-    },  // <-- Adicionada a vírgula aqui
+    },
     
     // Adicionar a função getToken
     getToken: () => {

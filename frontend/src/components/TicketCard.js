@@ -2,33 +2,30 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 
-function TicketCard({ ticket }) {
-    const navigate = useNavigate();
+const TicketCard = ({ ticket, onClick }) => {
     const { theme } = useTheme();
-
-    const priorityColors = {
-        low: '#28a745',
-        medium: '#ffc107',
-        high: '#dc3545'
+    
+    const statusColors = {
+        open: '#17a2b8',    // azul para aberto
+        closed: '#6c757d'   // cinza para fechado
     };
 
-    const statusColors = {
-        open: '#17a2b8',
-        closed: '#6c757d'
+    const priorityColors = {
+        high: '#dc3545',    // vermelho para alta
+        medium: '#ffc107',  // amarelo para média
+        low: '#28a745'      // verde para baixa
     };
 
     return (
-        <div
-            onClick={() => navigate(`/ticket/${ticket._id}`)}
-            style={{
-                backgroundColor: theme.cardBackground,
-                border: `1px solid ${theme.border}`,
-                borderRadius: '8px',
-                padding: '1rem',
-                marginBottom: '1rem',
+        <div 
+            onClick={onClick}
+            style={{ 
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                backgroundColor: theme.cardBackground,
+                padding: '1rem',
+                borderRadius: '8px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                marginBottom: '1rem'
             }}
         >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
@@ -40,7 +37,7 @@ function TicketCard({ ticket }) {
                     borderRadius: '12px',
                     fontSize: '0.875rem'
                 }}>
-                    {ticket.status}
+                    {ticket.status === 'open' ? 'Aberto' : 'Fechado'}
                 </span>
             </div>
 
@@ -52,7 +49,10 @@ function TicketCard({ ticket }) {
                     color: priorityColors[ticket.priority] || '#6c757d',
                     fontWeight: 'bold'
                 }}>
-                    Prioridade: {ticket.priority}
+                    Prioridade: {
+                        ticket.priority === 'high' ? 'Alta' : 
+                        ticket.priority === 'medium' ? 'Média' : 'Baixa'
+                    }
                 </span>
             </div>
 
@@ -67,6 +67,6 @@ function TicketCard({ ticket }) {
             </div>
         </div>
     );
-}
+};
 
 export default TicketCard;

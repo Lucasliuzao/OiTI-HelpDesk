@@ -1,275 +1,97 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import authService from '../services/authService';
-import { useTheme } from '../contexts/ThemeContext';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
-function Login() {
-    const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        email: '',
-        password: ''
-    });
-    const [error, setError] = useState('');
-    const [message, setMessage] = useState('');
-    const { theme, isDarkMode, toggleTheme } = useTheme();
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    useEffect(() => {
-        const loginMessage = localStorage.getItem('loginMessage');
-        if (loginMessage) {
-            setMessage(loginMessage);
-            localStorage.removeItem('loginMessage');
-        }
-    }, []);
+    if (!email || !password) {
+      setError('Por favor, preencha todos os campos');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError('');
+      await login(email, password);
+      navigate('/');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Falha no login. Verifique suas credenciais.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await authService.login(formData);
-            if (response && response.data) {
-                localStorage.setItem('user', JSON.stringify(response.data));
-                window.location.href = '/dashboard';
-            }
-        } catch (error) {
-            setError(error.message || 'Erro ao fazer login');
-        }
-    };
-
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-    };
-
-    return (
-        <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '100vh',
-            padding: '1rem',
-            backgroundColor: theme.background,
-            transition: 'all 0.3s ease'
-        }}>
-            <div style={{
-                padding: window.innerWidth < 480 ? '1.5rem' : '2rem',
-                backgroundColor: theme.cardBackground,
-                borderRadius: '8px',
-                boxShadow: isDarkMode 
-                    ? '0 4px 6px rgba(255, 255, 255, 0.1)' 
-                    : '0 4px 6px rgba(0, 0, 0, 0.1)',
-                width: '100%',
-                maxWidth: '400px',
-                position: 'relative',
-                transition: 'all 0.3s ease',
-                transform: 'translateY(0)',
-                animation: 'fadeIn 0.5s ease-out'
-            }}>
-                <style>
-                    {`
-                        @keyframes fadeIn {
-                            from {
-                                opacity: 0;
-                                transform: translateY(20px);
-                            }
-                            to {
-                                opacity: 1;
-                                transform: translateY(0);
-                            }
-                        }
-                        @keyframes shake {
-                            0%, 100% { transform: translateX(0); }
-                            25% { transform: translateX(-5px); }
-                            75% { transform: translateX(5px); }
-                        }
-                        input:focus {
-                            outline: none;
-                            border-color: ${theme.primary} !important;
-                            box-shadow: 0 0 0 2px ${theme.primary}33;
-                        }
-                        button:active {
-                            transform: scale(0.98);
-                        }
-                    `}
-                </style>
-                <h1 style={{ 
-                    textAlign: 'center', 
-                    color: theme.text, 
-                    marginBottom: '2rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '10px'
-                }}>
-                    <span style={{ 
-                        backgroundColor: theme.primary,
-                        color: 'white',
-                        width: '45px',
-                        height: '45px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '50%',
-                        fontSize: '1.1rem',
-                        fontWeight: 'bold',
-                        transition: 'background-color 0.3s ease'
-                    }}>OiTI</span>
-                    Central de Suporte
-                </h1>
-                {message && <div style={{ 
-                    color: theme.primary,
-                    backgroundColor: isDarkMode ? 'rgba(0, 102, 204, 0.1)' : '#e6f2ff',
-                    padding: '0.75rem',
-                    borderRadius: '4px',
-                    marginBottom: '1rem',
-                    transition: 'all 0.3s ease'
-                }}>{message}</div>}
-                {error && <div style={{ 
-                    color: '#dc3545',
-                    backgroundColor: isDarkMode ? 'rgba(220, 53, 69, 0.1)' : '#f8d7da',
-                    padding: '0.75rem',
-                    borderRadius: '4px',
-                    marginBottom: '1rem',
-                    transition: 'all 0.3s ease',
-                    animation: 'shake 0.5s ease-in-out'
-                }}>{error}</div>}
-                <form onSubmit={handleSubmit} style={{
-                    opacity: 1,
-                    transform: 'translateY(0)',
-                    transition: 'all 0.3s ease'
-                }}>
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ 
-                            display: 'block', 
-                            marginBottom: '0.5rem', 
-                            color: theme.text,
-                            transition: 'color 0.3s ease'
-                        }}>E-mail:</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                border: `1px solid ${theme.border}`,
-                                borderRadius: '4px',
-                                fontSize: '1rem',
-                                backgroundColor: theme.cardBackground,
-                                color: theme.text,
-                                transition: 'all 0.3s ease'
-                            }}
-                        />
-                    </div>
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <label style={{ 
-                            display: 'block', 
-                            marginBottom: '0.5rem', 
-                            color: theme.text,
-                            transition: 'color 0.3s ease'
-                        }}>Senha:</label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                border: `1px solid ${theme.border}`,
-                                borderRadius: '4px',
-                                fontSize: '1rem',
-                                backgroundColor: theme.cardBackground,
-                                color: theme.text,
-                                transition: 'all 0.3s ease'
-                            }}
-                        />
-                    </div>
-                    <button 
-                        type="submit"
-                        style={{
-                            width: '100%',
-                            padding: window.innerWidth < 480 ? '0.6rem' : '0.75rem',
-                            backgroundColor: theme.primary,
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            fontSize: window.innerWidth < 480 ? '0.9rem' : '1rem',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            transform: 'scale(1)',
-                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                        }}
-                        onMouseOver={(e) => {
-                            e.target.style.backgroundColor = theme.primaryHover;
-                            e.target.style.transform = 'scale(1.02)';
-                        }}
-                        onMouseOut={(e) => {
-                            e.target.style.backgroundColor = theme.primary;
-                            e.target.style.transform = 'scale(1)';
-                        }}
-                    >
-                        Entrar
-                    </button>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginTop: '1rem',
-                        fontSize: '0.9rem'
-                    }}>
-                        <a
-                            href="/recuperar-senha"
-                            style={{
-                                color: theme.primary,
-                                textDecoration: 'none',
-                                transition: 'color 0.3s ease'
-                            }}
-                            onMouseOver={(e) => e.target.style.color = theme.primaryHover}
-                            onMouseOut={(e) => e.target.style.color = theme.primary}
-                        >
-                            Esqueceu a senha?
-                        </a>
-                        <a
-                            href="/registro"
-                            style={{
-                                color: theme.primary,
-                                textDecoration: 'none',
-                                transition: 'color 0.3s ease'
-                            }}
-                            onMouseOver={(e) => e.target.style.color = theme.primaryHover}
-                            onMouseOut={(e) => e.target.style.color = theme.primary}
-                        >
-                            Criar conta
-                        </a>
-                    </div>
-                </form>
-                {/* Botão de tema com animação */}
-                <button
-                    onClick={toggleTheme}
-                    style={{
-                        position: 'absolute',
-                        top: '1rem',
-                        right: '1rem',
-                        padding: '0.5rem',
-                        borderRadius: '50%',
-                        border: 'none',
-                        backgroundColor: 'transparent',
-                        color: theme.text,
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        transform: 'rotate(0deg)'
-                    }}
-                    onMouseOver={(e) => e.target.style.transform = 'rotate(180deg)'}
-                    onMouseOut={(e) => e.target.style.transform = 'rotate(0deg)'}
-                >
-                    {isDarkMode ? '☀️' : '🌙'}
-                </button>
-            </div>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+      <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
+        <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white mb-6">
+          Central de Suporte
+        </h2>
+        
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-gray-700 dark:text-gray-300 mb-2" htmlFor="email">
+              E-mail:
+            </label>
+            <input
+              id="email"
+              type="email"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="mb-6">
+            <label className="block text-gray-700 dark:text-gray-300 mb-2" htmlFor="password">
+              Senha:
+            </label>
+            <input
+              id="password"
+              type="password"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          
+          <button
+            type="submit"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            disabled={loading}
+          >
+            {loading ? 'Entrando...' : 'Entrar'}
+          </button>
+        </form>
+        
+        <div className="mt-4 flex justify-between text-sm">
+          <Link to="/forgot-password" className="text-blue-500 hover:text-blue-700 dark:text-blue-400">
+            Esqueceu a senha?
+          </Link>
+          <Link to="/register" className="text-blue-500 hover:text-blue-700 dark:text-blue-400">
+            Criar conta
+          </Link>
         </div>
-    );
-}
+      </div>
+    </div>
+  );
+};
 
 export default Login;

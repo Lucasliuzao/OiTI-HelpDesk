@@ -1,37 +1,58 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-const User = require('./User');
+const mongoose = require('mongoose');
 
-const Ticket = sequelize.define('Ticket', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
+const ticketSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true
   },
-  titulo: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  descricao: {
-    type: DataTypes.TEXT,
-    allowNull: false
+  description: {
+    type: String,
+    required: true
   },
   status: {
-    type: DataTypes.ENUM('Aberto', 'Em Andamento', 'Fechado'),
-    defaultValue: 'Aberto'
+    type: String,
+    enum: ['open', 'closed'],
+    default: 'open'
   },
-  prioridade: {
-    type: DataTypes.ENUM('Baixa', 'Média', 'Alta'),
-    defaultValue: 'Média'
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high'],
+    default: 'medium'
   },
-  categoria: {
-    type: DataTypes.STRING,
-    allowNull: false
+  category: {
+    type: String,
+    required: true
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  comments: [{
+    text: {
+      type: String,
+      required: true
+    },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
+  // Removido o campo queue que foi adicionado anteriormente
 });
 
-// Relacionamento com o usuário
-Ticket.belongsTo(User, { foreignKey: 'userId', as: 'usuario' });
-User.hasMany(Ticket, { foreignKey: 'userId', as: 'tickets' });
-
+const Ticket = mongoose.model('Ticket', ticketSchema);
 module.exports = Ticket;

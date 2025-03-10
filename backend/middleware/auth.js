@@ -1,30 +1,26 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const config = require('../config/config');
 
-module.exports = async (req, res, next) => {
-  try {
-    // Verificar se o token está presente no header
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    
-    if (!token) {
-      return res.status(401).json({ message: 'Autenticação necessária' });
+module.exports = (req, res, next) => {
+    try {
+        // Verificar se o cabeçalho de autorização existe
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(401).json({ message: 'Não autorizado: Token não fornecido' });
+        }
+
+        // Extrair o token do cabeçalho (formato: "Bearer TOKEN")
+        const token = authHeader.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'Não autorizado: Formato de token inválido' });
+        }
+
+        // Verificar e decodificar o token
+        const decoded = jwt.verify(token, config.jwtSecret);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        console.error('Erro de autenticação:', error);
+        return res.status(401).json({ message: 'Não autorizado: Token inválido' });
     }
-
-    // Verificar e decodificar o token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // Buscar o usuário pelo ID
-    const user = await User.findByPk(decoded.id);
-    
-    if (!user) {
-      return res.status(401).json({ message: 'Usuário não encontrado' });
-    }
-
-    // Adicionar o usuário ao objeto de requisição
-    req.user = user;
-    next();
-  } catch (error) {
-    console.error('Erro de autenticação:', error);
-    return res.status(401).json({ message: 'Token inválido ou expirado' });
-  }
 };
