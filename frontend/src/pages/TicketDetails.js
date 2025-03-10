@@ -1,111 +1,176 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 import ticketService from '../services/ticketService';
 
 function TicketDetails() {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { theme } = useTheme();
     const [ticket, setTicket] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [comment, setComment] = useState('');
-    const { id } = useParams();
-    const navigate = useNavigate();
 
     useEffect(() => {
-        loadTicket();
+        const fetchTicket = async () => {
+            try {
+                console.log('Fetching ticket with ID:', id);
+                const data = await ticketService.getTicketById(id);
+                console.log('Ticket data received:', data);
+                setTicket(data);
+            } catch (err) {
+                console.error('Error fetching ticket:', err);
+                setError('Não foi possível carregar os detalhes do ticket');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTicket();
     }, [id]);
 
-    const loadTicket = async () => {
-        try {
-            const response = await ticketService.getTicketById(id);
-            setTicket(response.data);
-            setLoading(false);
-        } catch (err) {
-            setError('Failed to load ticket');
-            setLoading(false);
-        }
-    };
+    if (loading) {
+        return (
+            <div style={{ 
+                minHeight: '100vh',
+                backgroundColor: theme.background,
+                color: theme.text,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+            }}>
+                Carregando...
+            </div>
+        );
+    }
 
-    const handleStatusUpdate = async (newStatus) => {
-        try {
-            await ticketService.updateTicket(id, { status: newStatus });
-            loadTicket();
-        } catch (err) {
-            setError('Failed to update status');
-        }
-    };
+    if (error) {
+        return (
+            <div style={{ 
+                minHeight: '100vh',
+                backgroundColor: theme.background,
+                color: theme.text,
+                padding: '2rem'
+            }}>
+                <div style={{
+                    maxWidth: '800px',
+                    margin: '0 auto',
+                    textAlign: 'center'
+                }}>
+                    <h2>{error}</h2>
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            backgroundColor: theme.primary,
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            marginTop: '1rem'
+                        }}
+                    >
+                        Voltar para Dashboard
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
-    const handleAddComment = async (e) => {
-        e.preventDefault();
-        try {
-            await ticketService.addComment(id, { text: comment });
-            setComment('');
-            loadTicket();
-        } catch (err) {
-            setError('Failed to add comment');
-        }
-    };
-
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div style={{ color: 'red' }}>{error}</div>;
-    if (!ticket) return <div>Ticket not found</div>;
+    if (!ticket) {
+        return (
+            <div style={{ 
+                minHeight: '100vh',
+                backgroundColor: theme.background,
+                color: theme.text,
+                padding: '2rem'
+            }}>
+                <div style={{
+                    maxWidth: '800px',
+                    margin: '0 auto',
+                    textAlign: 'center'
+                }}>
+                    <h2>Ticket não encontrado</h2>
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            backgroundColor: theme.primary,
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            marginTop: '1rem'
+                        }}
+                    >
+                        Voltar para Dashboard
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-            <button 
-                onClick={() => navigate('/dashboard')}
-                style={{ marginBottom: '20px' }}
-            >
-                Back to Dashboard
-            </button>
+        <div style={{
+            minHeight: '100vh',
+            backgroundColor: theme.background,
+            color: theme.text,
+            padding: '2rem'
+        }}>
+            <div style={{
+                maxWidth: '800px',
+                margin: '0 auto',
+                backgroundColor: theme.cardBackground,
+                borderRadius: '8px',
+                padding: '2rem',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
+                <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    marginBottom: '2rem' 
+                }}>
+                    <h1 style={{ margin: 0 }}>{ticket.title}</h1>
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            backgroundColor: theme.primary,
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Voltar
+                    </button>
+                </div>
 
-            <h1>{ticket.title}</h1>
-            <div style={{ marginBottom: '20px' }}>
-                <p><strong>Description:</strong> {ticket.description}</p>
-                <p><strong>Status:</strong> {ticket.status}</p>
-                <p><strong>Priority:</strong> {ticket.priority}</p>
-                <p><strong>Category:</strong> {ticket.category}</p>
-            </div>
-
-            <div style={{ marginBottom: '20px' }}>
-                <h3>Update Status</h3>
-                <select 
-                    value={ticket.status}
-                    onChange={(e) => handleStatusUpdate(e.target.value)}
-                    style={{ padding: '5px' }}
-                >
-                    <option value="open">Open</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                </select>
-            </div>
-
-            <div>
-                <h3>Comments</h3>
-                <form onSubmit={handleAddComment}>
-                    <textarea
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        placeholder="Add a comment..."
-                        style={{ width: '100%', minHeight: '100px', marginBottom: '10px' }}
-                    />
-                    <button type="submit">Add Comment</button>
-                </form>
-
-                <div style={{ marginTop: '20px' }}>
-                    {ticket.comments && ticket.comments.map((comment, index) => (
-                        <div 
-                            key={index}
-                            style={{ 
-                                border: '1px solid #ddd',
-                                padding: '10px',
-                                marginBottom: '10px'
-                            }}
-                        >
-                            <p>{comment.text}</p>
-                            <small>By: {comment.createdBy?.name || 'Unknown'}</small>
+                <div style={{ marginBottom: '2rem' }}>
+                    <h3>Detalhes do Ticket</h3>
+                    <div style={{ display: 'grid', gap: '1rem' }}>
+                        <div>
+                            <strong>Status:</strong> {ticket.status}
                         </div>
-                    ))}
+                        <div>
+                            <strong>Categoria:</strong> {ticket.category}
+                        </div>
+                        <div>
+                            <strong>Prioridade:</strong> {ticket.priority}
+                        </div>
+                        <div>
+                            <strong>Criado em:</strong> {new Date(ticket.createdAt).toLocaleString()}
+                        </div>
+                        <div>
+                            <strong>Última atualização:</strong> {new Date(ticket.updatedAt).toLocaleString()}
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3>Descrição</h3>
+                    <p style={{ whiteSpace: 'pre-wrap' }}>{ticket.description}</p>
                 </div>
             </div>
         </div>

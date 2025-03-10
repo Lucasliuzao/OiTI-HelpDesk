@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
+import { useTheme } from '../contexts/ThemeContext';
 
 function Login() {
     const navigate = useNavigate();
@@ -10,6 +11,7 @@ function Login() {
     });
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
+    const { theme, isDarkMode, toggleTheme } = useTheme();
     
     useEffect(() => {
         const loginMessage = localStorage.getItem('loginMessage');
@@ -44,35 +46,105 @@ function Login() {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            height: '100vh',
-            backgroundColor: '#f5f5f5'
+            minHeight: '100vh',
+            padding: '1rem',
+            backgroundColor: theme.background,
+            transition: 'all 0.3s ease'
         }}>
             <div style={{
-                padding: '2rem',
-                backgroundColor: 'white',
+                padding: window.innerWidth < 480 ? '1.5rem' : '2rem',
+                backgroundColor: theme.cardBackground,
                 borderRadius: '8px',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                boxShadow: isDarkMode 
+                    ? '0 4px 6px rgba(255, 255, 255, 0.1)' 
+                    : '0 4px 6px rgba(0, 0, 0, 0.1)',
                 width: '100%',
-                maxWidth: '400px'
+                maxWidth: '400px',
+                position: 'relative',
+                transition: 'all 0.3s ease',
+                transform: 'translateY(0)',
+                animation: 'fadeIn 0.5s ease-out'
             }}>
-                <h1 style={{ textAlign: 'center', color: '#333', marginBottom: '2rem' }}>HelpDesk Login</h1>
+                <style>
+                    {`
+                        @keyframes fadeIn {
+                            from {
+                                opacity: 0;
+                                transform: translateY(20px);
+                            }
+                            to {
+                                opacity: 1;
+                                transform: translateY(0);
+                            }
+                        }
+                        @keyframes shake {
+                            0%, 100% { transform: translateX(0); }
+                            25% { transform: translateX(-5px); }
+                            75% { transform: translateX(5px); }
+                        }
+                        input:focus {
+                            outline: none;
+                            border-color: ${theme.primary} !important;
+                            box-shadow: 0 0 0 2px ${theme.primary}33;
+                        }
+                        button:active {
+                            transform: scale(0.98);
+                        }
+                    `}
+                </style>
+                <h1 style={{ 
+                    textAlign: 'center', 
+                    color: theme.text, 
+                    marginBottom: '2rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px'
+                }}>
+                    <span style={{ 
+                        backgroundColor: theme.primary,
+                        color: 'white',
+                        width: '45px',
+                        height: '45px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '50%',
+                        fontSize: '1.1rem',
+                        fontWeight: 'bold',
+                        transition: 'background-color 0.3s ease'
+                    }}>OiTI</span>
+                    Central de Suporte
+                </h1>
                 {message && <div style={{ 
-                    color: '#0066cc', 
-                    backgroundColor: '#e6f2ff',
+                    color: theme.primary,
+                    backgroundColor: isDarkMode ? 'rgba(0, 102, 204, 0.1)' : '#e6f2ff',
                     padding: '0.75rem',
                     borderRadius: '4px',
-                    marginBottom: '1rem' 
+                    marginBottom: '1rem',
+                    transition: 'all 0.3s ease'
                 }}>{message}</div>}
                 {error && <div style={{ 
-                    color: '#dc3545', 
-                    backgroundColor: '#f8d7da',
+                    color: '#dc3545',
+                    backgroundColor: isDarkMode ? 'rgba(220, 53, 69, 0.1)' : '#f8d7da',
                     padding: '0.75rem',
                     borderRadius: '4px',
-                    marginBottom: '1rem' 
+                    marginBottom: '1rem',
+                    transition: 'all 0.3s ease',
+                    animation: 'shake 0.5s ease-in-out'
                 }}>{error}</div>}
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} style={{
+                    opacity: 1,
+                    transform: 'translateY(0)',
+                    transition: 'all 0.3s ease'
+                }}>
                     <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#555' }}>Email:</label>
+                        <label style={{ 
+                            display: 'block', 
+                            marginBottom: '0.5rem', 
+                            color: theme.text,
+                            transition: 'color 0.3s ease'
+                        }}>E-mail:</label>
                         <input
                             type="email"
                             name="email"
@@ -82,14 +154,22 @@ function Login() {
                             style={{
                                 width: '100%',
                                 padding: '0.75rem',
-                                border: '1px solid #ddd',
+                                border: `1px solid ${theme.border}`,
                                 borderRadius: '4px',
-                                fontSize: '1rem'
+                                fontSize: '1rem',
+                                backgroundColor: theme.cardBackground,
+                                color: theme.text,
+                                transition: 'all 0.3s ease'
                             }}
                         />
                     </div>
                     <div style={{ marginBottom: '1.5rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#555' }}>Password:</label>
+                        <label style={{ 
+                            display: 'block', 
+                            marginBottom: '0.5rem', 
+                            color: theme.text,
+                            transition: 'color 0.3s ease'
+                        }}>Senha:</label>
                         <input
                             type="password"
                             name="password"
@@ -99,9 +179,12 @@ function Login() {
                             style={{
                                 width: '100%',
                                 padding: '0.75rem',
-                                border: '1px solid #ddd',
+                                border: `1px solid ${theme.border}`,
                                 borderRadius: '4px',
-                                fontSize: '1rem'
+                                fontSize: '1rem',
+                                backgroundColor: theme.cardBackground,
+                                color: theme.text,
+                                transition: 'all 0.3s ease'
                             }}
                         />
                     </div>
@@ -109,19 +192,81 @@ function Login() {
                         type="submit"
                         style={{
                             width: '100%',
-                            padding: '0.75rem',
-                            backgroundColor: '#0066cc',
+                            padding: window.innerWidth < 480 ? '0.6rem' : '0.75rem',
+                            backgroundColor: theme.primary,
                             color: 'white',
                             border: 'none',
                             borderRadius: '4px',
-                            fontSize: '1rem',
+                            fontSize: window.innerWidth < 480 ? '0.9rem' : '1rem',
                             cursor: 'pointer',
-                            transition: 'background-color 0.2s'
+                            transition: 'all 0.2s ease',
+                            transform: 'scale(1)',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                        }}
+                        onMouseOver={(e) => {
+                            e.target.style.backgroundColor = theme.primaryHover;
+                            e.target.style.transform = 'scale(1.02)';
+                        }}
+                        onMouseOut={(e) => {
+                            e.target.style.backgroundColor = theme.primary;
+                            e.target.style.transform = 'scale(1)';
                         }}
                     >
-                        Login
+                        Entrar
                     </button>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        marginTop: '1rem',
+                        fontSize: '0.9rem'
+                    }}>
+                        <a
+                            href="/recuperar-senha"
+                            style={{
+                                color: theme.primary,
+                                textDecoration: 'none',
+                                transition: 'color 0.3s ease'
+                            }}
+                            onMouseOver={(e) => e.target.style.color = theme.primaryHover}
+                            onMouseOut={(e) => e.target.style.color = theme.primary}
+                        >
+                            Esqueceu a senha?
+                        </a>
+                        <a
+                            href="/registro"
+                            style={{
+                                color: theme.primary,
+                                textDecoration: 'none',
+                                transition: 'color 0.3s ease'
+                            }}
+                            onMouseOver={(e) => e.target.style.color = theme.primaryHover}
+                            onMouseOut={(e) => e.target.style.color = theme.primary}
+                        >
+                            Criar conta
+                        </a>
+                    </div>
                 </form>
+                {/* Botão de tema com animação */}
+                <button
+                    onClick={toggleTheme}
+                    style={{
+                        position: 'absolute',
+                        top: '1rem',
+                        right: '1rem',
+                        padding: '0.5rem',
+                        borderRadius: '50%',
+                        border: 'none',
+                        backgroundColor: 'transparent',
+                        color: theme.text,
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        transform: 'rotate(0deg)'
+                    }}
+                    onMouseOver={(e) => e.target.style.transform = 'rotate(180deg)'}
+                    onMouseOut={(e) => e.target.style.transform = 'rotate(0deg)'}
+                >
+                    {isDarkMode ? '☀️' : '🌙'}
+                </button>
             </div>
         </div>
     );
